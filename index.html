@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exam Timer</title>
+  </head>
+  <body>
+    <div>
+      <div>
+        <span id="timer"></span><span> minutes</span><span> remaining</span>
+      </div>
+      <button id="pause" onclick="pause()">Pause</button>
+    </div>
+    <script>
+      function animationInterval(ms, signal, callback) {
+        // Prefer currentTime, as it'll better sync animtions queued in the
+        // same frame, but if it isn't supported, performance.now() is fine.
+        const start = 0;
+
+        function frame(time) {
+          if (signal.aborted) return;
+          callback(time);
+          scheduleFrame(time);
+        }
+
+        function scheduleFrame(time) {
+          const elapsed = time - start;
+          const roundedElapsed = Math.round(elapsed / ms) * ms;
+          const targetNext = start + roundedElapsed + ms;
+          const delay = targetNext - performance.now();
+          setTimeout(() => requestAnimationFrame(frame), delay);
+        }
+
+        scheduleFrame(start);
+      }
+    </script>
+    <script>
+      let controller = new AbortController();
+      const timerElem = document.getElementById("timer");
+      let paused = false;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      let minutesStart = urlParams.get("minutes");
+      if (!minutesStart) {
+        minutesStart = 90;
+        urlParams.set("minutes", 90);
+      }
+
+      function setText(timerElem, minutesFloat, minutesStart) {
+        timerElem.innerText = Math.floor(minutesStart - minutesFloat);
+      }
+
+      setText(timerElem, 0, minutesStart);
+
+      function timerCallback(time) {
+        minutesFloat = time / 1000 / 60;
+        setText(timerElem, minutesFloat, minutesStart);
+      }
+
+      animationInterval(100, controller.signal, timerCallback);
+
+      function pause() {
+        if (!paused) {
+          controller.abort();
+          timerElem.classList.add("paused");
+          paused = true;
+          document.getElementById("pause").innerText = "Unpause";
+        } else {
+          controller = new AbortController();
+          minutesStart = minutesStart - minutesFloat;
+          minutesFloat = 0;
+          timerElem.classList.remove("paused");
+          paused = false;
+          document.getElementById("pause").innerText = "Pause";
+          animationInterval(10000, controller.signal, timerCallback);
+        }
+        return paused;
+      }
+    </script>
+    <style>
+      /* spectral-600 - latin */
+      @font-face {
+        font-family: "Spectral";
+        font-style: normal;
+        font-weight: 600;
+        src: local(""),
+          url("./fonts/spectral-v13-latin-600.woff2") format("woff2"),
+          /* Chrome 26+, Opera 23+, Firefox 39+ */
+            url("./fonts/spectral-v13-latin-600.woff") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+      }
+    </style>
+    <style>
+      :root {
+        font-family: "Spectral";
+      }
+      .paused {
+        opacity: 50%;
+      }
+      body {
+        height: calc(100vh - 4rem);
+        width: calc(100vw - 4rem);
+        margin: auto auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      span {
+        font-size: 4rem;
+        transition: opacity 0.25s ease;
+      }
+      button {
+        all: unset;
+        padding: 0.2rem 0.5rem;
+        border: 1px solid hsla(0, 0%, 0%, 0.3);
+        width: 4rem;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0px 1px 2.7px rgba(0, 0, 0, 0.062),
+          0px 2.6px 6.9px rgba(0, 0, 0, 0.089),
+          0px 5.3px 14.2px rgba(0, 0, 0, 0.111),
+          0px 11px 29.2px rgba(0, 0, 0, 0.138), 0px 30px 80px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+  </body>
+</html>
