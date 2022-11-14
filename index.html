@@ -9,19 +9,19 @@
   <body>
     <div>
       <div>
-        <span id="timer"></span><span> minutes</span><span> remaining</span>
+        <span id="timer"></span><span id="text"> minutes</span><span> remaining</span>
       </div>
       <button id="pause" onclick="pause()">Pause</button>
     </div>
     <script>
       function animationInterval(ms, signal, callback) {
-        // Prefer currentTime, as it'll better sync animtions queued in the
-        // same frame, but if it isn't supported, performance.now() is fine.
         const start = 0;
 
         function frame(time) {
           if (signal.aborted) return;
+
           callback(time);
+
           scheduleFrame(time);
         }
 
@@ -39,45 +39,75 @@
     <script>
       let controller = new AbortController();
       const timerElem = document.getElementById("timer");
+      const textElem = document.getElementById("text");
+      const interval = 1000;
+      let domTime = 0;
+      let domTimeOffset = 0;
       let paused = false;
+      let minutesFloat;
 
       const urlParams = new URLSearchParams(window.location.search);
       let minutesStart = urlParams.get("minutes");
       if (!minutesStart) {
+        console.log("hi")
         minutesStart = 90;
-        urlParams.set("minutes", 90);
+        urlParams.set("minutes", minutesStart);
+        window.location.search = urlParams;
       }
 
       function setText(timerElem, minutesFloat, minutesStart) {
-        timerElem.innerText = Math.floor(minutesStart - minutesFloat);
+        const remaining = minutesStart - minutesFloat;
+        console.log("did: " + minutesStart + " - " + minutesFloat);
+        console.log(remaining);
+        if (remaining < 1) {
+            timerElem.innerText = Math.floor(remaining * 60);
+            if (Math.floor(remaining * 60) === 1) {
+                textElem.innerText = " second";
+            } else {
+                textElem.innerText = " seconds";
+            }
+        } else if (Math.floor(remaining) === 1) {
+            textElem.innerHTML = " minute"
+            timerElem.innerText = Math.floor(remaining);
+        } else {
+            timerElem.innerText = Math.floor(remaining);
+        }
       }
 
       setText(timerElem, 0, minutesStart);
 
       function timerCallback(time) {
-        minutesFloat = time / 1000 / 60;
+        domTime = time;
+        console.log("TIME: "+  (time - domTimeOffset));
+        minutesFloat = (time - domTimeOffset) / 1000 / 60;
         setText(timerElem, minutesFloat, minutesStart);
       }
 
-      animationInterval(10000, controller.signal, timerCallback);
+      animationInterval(interval, controller.signal, timerCallback);
 
       function pause() {
         if (!paused) {
           controller.abort();
+          domTimeOffset = domTime;
           timerElem.classList.add("paused");
           paused = true;
           document.getElementById("pause").innerText = "Unpause";
+          console.log(minutesStart - minutesFloat);
         } else {
           controller = new AbortController();
           minutesStart = minutesStart - minutesFloat;
+          console.log(" starting at: " + minutesStart);
           minutesFloat = 0;
+          console.log("reset minutes float " + minutesFloat)
           timerElem.classList.remove("paused");
           paused = false;
           document.getElementById("pause").innerText = "Pause";
-          animationInterval(10000, controller.signal, timerCallback);
+          animationInterval(interval, controller.signal, timerCallback);
         }
         return paused;
       }
+
+      timerCallback(0);
     </script>
     <style>
       /* spectral-600 - latin */
