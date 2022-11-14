@@ -9,7 +9,8 @@
   <body>
     <div class="wrap">
       <div>
-        <span id="timer"></span><span id="text"> minutes</span><span> remaining</span>
+        <span id="timer"></span><span id="text"> minutes</span
+        ><span> remaining</span>
       </div>
       <button id="pause" onclick="pause()">Pause</button>
     </div>
@@ -57,19 +58,20 @@
       function setText(timerElem, minutesFloat, minutesStart) {
         const remaining = minutesStart - minutesFloat;
         if (remaining < 1) {
-            timerElem.innerText = Math.floor(remaining * 60);
-            if (Math.floor(remaining * 60) === 1) {
-                textElem.innerText = " second";
-            } else if (Math.floor(remaining * 60) <= 0) {
-              controller.abort();
-              timerElem.innerText = 0;
-              audio = new Audio("./ding.ogg");
-              audio.play();
-            } else {
-              textElem.innerText = " seconds";
-            }
+          timerElem.innerText = Math.floor(remaining * 60);
+          if (Math.floor(remaining * 60) === 1) {
+            textElem.innerText = " second";
+          } else if (Math.floor(remaining * 60) <= 0) {
+            controller.abort();
+            timerElem.innerText = 0;
+            textElem.innerText = " seconds";
+            audio = new Audio("./ding.ogg");
+            audio.play();
+          } else {
+            textElem.innerText = " seconds";
+          }
         } else if (Math.floor(remaining) === 1) {
-          textElem.innerHTML = " minute"
+          textElem.innerHTML = " minute";
           timerElem.innerText = Math.floor(remaining);
         } else {
           timerElem.innerText = Math.floor(remaining);
@@ -157,7 +159,8 @@
         box-shadow: 0px 1px 2.7px hsla(var(--text), 0.062),
           0px 2.6px 6.9px hsla(var(--text), 0.089),
           0px 5.3px 14.2px hsla(var(--text), 0.111),
-          0px 11px 29.2px hsla(var(--text), 0.138), 0px 30px 80px hsla(var(--text), 0.2);
+          0px 11px 29.2px hsla(var(--text), 0.138),
+          0px 30px 80px hsla(var(--text), 0.2);
       }
       button:focus-visible {
         outline: 1px solid blue;
@@ -166,7 +169,7 @@
       @media (prefers-color-scheme: dark) {
         :root {
           --bg: 0, 0%, 0%;
-        --text: 0, 0%, 100%;
+          --text: 0, 0%, 100%;
         }
       }
     </style>
