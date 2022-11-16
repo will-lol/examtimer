@@ -14,6 +14,7 @@
       </div>
       <button id="pause" onclick="pauseTimer()">Pause</button>
     </div>
+    <script defer src="confetti.js"></script>
     <script>
       function animationInterval(ms, signal, callback) {
         const start = 0;
@@ -52,7 +53,6 @@
       function timerCallback(startDate, currentDate) {
         const diff = (currentDate - startDate) / 1000;
         remainingSeconds = totalSeconds - diff;
-        console.log("help");
 
         console.log(remainingSeconds);
         if (remainingSeconds < 0) {
@@ -64,10 +64,10 @@
         function setText(seconds) {
           if (seconds > 60) {
             timerElem.innerText = Math.floor(seconds / 60);
-            textElem.innerText = pluralizer(" minute", seconds / 60);
+            textElem.innerText = pluralizer(" minute", Math.floor(seconds / 60));
           } else if (seconds > 0) {
             timerElem.innerText = Math.floor(seconds);
-            textElem.innerText = pluralizer(" second", seconds);
+            textElem.innerText = pluralizer(" second", Math.floor(seconds));
           }
         }
 
@@ -82,13 +82,12 @@
 
       function endTimer() {
         controller.abort();
-        console.log("called");
         audio = new Audio("./ding.ogg");
         audio.play();
+        confetti({ origin: { y: 1 }, startVelocity: 70, particleCount: 100, disableForReducedMotion: true });
       }
 
       function startTimer(interval) {
-        console.log("hi");
         animationInterval(interval, controller.signal, timerCallback);
       }
 
