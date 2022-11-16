@@ -16,6 +16,7 @@
     </div>
     <script defer src="confetti.js"></script>
     <script>
+      //This script holds the animation interval function. This function handles the timer loop. It should not be edited.
       function animationInterval(ms, signal, callback) {
         const start = 0;
         const startDate = Date.now();
@@ -45,21 +46,23 @@
       const timerElem = document.getElementById("timer");
       const textElem = document.getElementById("text");
       const pauseButton = document.getElementById("pause");
-      const audio = new Audio("./ding.ogg");
-      const interval = 1000;
+      const audio = new Audio("./ding.ogg");  //Path to audio file sound effect
+      audio.preload = "auto"; //Ensure the audio preloads before the timer goes off
+      const interval = 1000;  //How fast the timer will update (milliseconds)
+      const defaultMinutes = 90; //Set the default minutes HERE!!
       const urlParams = new URLSearchParams(window.location.search);
       let paused = false;
       let remainingSeconds;
 
+      //The timerCallback function is called every interval. It will update the remaining time.
       function timerCallback(startDate, currentDate) {
-        const diff = (currentDate - startDate) / 1000;
-        remainingSeconds = totalSeconds - diff;
+        const diff = (currentDate - startDate) / 1000;  //Calculate the time difference from when the timer was last unpaused/started
+        remainingSeconds = totalSeconds - diff; //Calculate the remaining seconds
 
-        console.log(remainingSeconds);
         if (remainingSeconds < 0) {
-          endTimer();
+          endTimer(); //If the timer is up, end the timer.
         } else {
-          setText(remainingSeconds);
+          setText(remainingSeconds);  //Otherwise, update the text
         }
 
         function setText(seconds) {
@@ -72,6 +75,7 @@
           }
         }
 
+        //Pluralizer simply ensures that the sentence displayed always makes sense. '1 second remaining' rather than '1 seconds remaining'
         function pluralizer(string, num) {
           if (num == 1) {
             return string;
@@ -82,45 +86,50 @@
       }
 
       function endTimer() {
-        controller.abort();
-        audio.play();
-        confetti({ origin: { y: 1 }, startVelocity: 70, particleCount: 100, disableForReducedMotion: true });
+        controller.abort(); //Stop the intervals from running
+        audio.play(); //Play the audio
+        confetti({ origin: { y: 1 }, startVelocity: 70, particleCount: 100, disableForReducedMotion: true }); //Trigger confetti. Configuration of confetti according to https://github.com/catdad/canvas-confetti
       }
 
       function startTimer(interval) {
         animationInterval(interval, controller.signal, timerCallback);
       }
 
+      //This function will get the url params, if they don't exist, update them with a default value.
       function initialise() {
         let minutesStart = urlParams.get("minutes");
         if (!minutesStart) {
-          urlParams.set("minutes", 90);
+          urlParams.set("minutes", defaultMinutes); 
           window.location.search = urlParams;
-          return 90;
+          return defaultMinutes; 
         } else {
           return minutesStart;
         }
       }
 
       let totalSeconds = initialise() * 60;
-      startTimer(1000);
+      startTimer(interval);
 
+      //The pauseTimer function is a toggle function. It will pause and unpause.
+      //It effectively starts the timer again.
       function pauseTimer() {
         if (!paused) {
           paused = true;
           pauseButton.innerText = "Unpause";
-          timerElem.classList.add("paused");
+          timerElem.classList.add("paused");  //Add the paused class for a nice little bit of visual feedback
           controller.abort();
         } else {
           paused = false;
           pauseButton.innerText = "Pause";
-          timerElem.classList.remove("paused");
-          totalSeconds = remainingSeconds;
-          controller = new AbortController();
-          startTimer(interval);
+          timerElem.classList.remove("paused"); //Remove the paused class
+          totalSeconds = remainingSeconds;  //Retrieve the remaining seconds, set to timer seconds.
+          controller = new AbortController(); //Reset the interval controller
+          startTimer(interval); //Start the timer again!
         }
       }
     </script>
+
+    <!-- FONTS -->
     <style>
       /* spectral-600 - latin */
       @font-face {
@@ -133,7 +142,9 @@
             url("./fonts/spectral-v13-latin-600.woff") format("woff"); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
       }
     </style>
+    <!-- SOME BASIC STYLING -->
     <style>
+      /* change colours and stuff here */
       :root {
         font-family: "Spectral";
         color: hsla(var(--text), 1);
@@ -141,6 +152,7 @@
         --bg: 0, 0%, 100%;
         --text: 0, 0%, 0%;
       }
+      /* only go beyond if you know CSS! */
       .paused {
         opacity: 50%;
       }
