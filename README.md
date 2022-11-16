@@ -2,6 +2,8 @@
 Exam Timer is a low frequency timer that aims to be simple and avoid distractions. 
 The timer features a sound effect and visual effect once the exam is complete.
 Disable the visual effect by turning on prefer reduce motion via browser settings or system settings.
+## NOTE
+Most modern browsers require the enablement of autoplay or sound for the timer sound effect to work. Firefox should show a permission popup. Set 'sound' to allow in Chromium browsers. Safari is unsupported.
 ## Usage
 The timer will automatically use a 90 minute duration. 
 To set a custom duration, use URL parameters. 
