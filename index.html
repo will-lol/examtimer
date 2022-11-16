@@ -9,19 +9,21 @@
   <body>
     <div class="wrap">
       <div>
-        <span id="timer"></span><span id="text"> minutes</span
+        <span id="timer">null</span><span id="text"> minutes</span
         ><span> remaining</span>
       </div>
-      <button id="pause" onclick="pause()">Pause</button>
+      <button id="pause" onclick="pauseTimer()">Pause</button>
     </div>
     <script>
       function animationInterval(ms, signal, callback) {
         const start = 0;
+        const startDate = Date.now();
 
         function frame(time) {
           if (signal.aborted) return;
 
-          callback(time);
+          const current = Date.now();
+          callback(startDate, current);
 
           scheduleFrame(time);
         }
@@ -41,72 +43,84 @@
       let controller = new AbortController();
       const timerElem = document.getElementById("timer");
       const textElem = document.getElementById("text");
+      const pauseButton = document.getElementById("pause");
       const interval = 1000;
-      let domTime = 0;
-      let domTimeOffset = 0;
-      let paused = false;
-      let minutesFloat;
-
       const urlParams = new URLSearchParams(window.location.search);
-      let minutesStart = urlParams.get("minutes");
-      if (!minutesStart) {
-        minutesStart = 90;
-        urlParams.set("minutes", minutesStart);
-        window.location.search = urlParams;
-      }
+      let paused = false;
+      let remainingSeconds;
 
-      function setText(timerElem, minutesFloat, minutesStart) {
-        const remaining = minutesStart - minutesFloat;
-        if (remaining < 1) {
-          timerElem.innerText = Math.floor(remaining * 60);
-          if (Math.floor(remaining * 60) === 1) {
-            textElem.innerText = " second";
-          } else if (Math.floor(remaining * 60) <= 0) {
-            controller.abort();
-            timerElem.innerText = 0;
-            textElem.innerText = " seconds";
-            audio = new Audio("./ding.ogg");
-            audio.play();
-          } else {
-            textElem.innerText = " seconds";
+      function timerCallback(startDate, currentDate) {
+        const diff = (currentDate - startDate) / 1000;
+        remainingSeconds = totalSeconds - diff;
+        console.log("help");
+
+        console.log(remainingSeconds);
+        if (remainingSeconds < 0) {
+          endTimer();
+        } else {
+          setText(remainingSeconds);
+        }
+
+        function setText(seconds) {
+          if (seconds > 60) {
+            timerElem.innerText = Math.floor(seconds / 60);
+            textElem.innerText = pluralizer(" minute", seconds / 60);
+          } else if (seconds > 0) {
+            timerElem.innerText = Math.floor(seconds);
+            textElem.innerText = pluralizer(" second", seconds);
           }
-        } else if (Math.floor(remaining) === 1) {
-          textElem.innerHTML = " minute";
-          timerElem.innerText = Math.floor(remaining);
-        } else {
-          timerElem.innerText = Math.floor(remaining);
+        }
+
+        function pluralizer(string, num) {
+          if (num == 1) {
+            return string;
+          } else {
+            return string + "s";
+          }
         }
       }
 
-      function timerCallback(time) {
-        domTime = time;
-        minutesFloat = (time - domTimeOffset) / 1000 / 60;
-        setText(timerElem, minutesFloat, minutesStart);
+      function endTimer() {
+        controller.abort();
+        console.log("called");
+        audio = new Audio("./ding.ogg");
+        audio.play();
       }
 
-      setText(timerElem, 0, minutesStart);
-      animationInterval(interval, controller.signal, timerCallback);
+      function startTimer(interval) {
+        console.log("hi");
+        animationInterval(interval, controller.signal, timerCallback);
+      }
 
-      function pause() {
+      function initialise() {
+        let minutesStart = urlParams.get("minutes");
+        if (!minutesStart) {
+          urlParams.set("minutes", 90);
+          window.location.search = urlParams;
+          return 90;
+        } else {
+          return minutesStart;
+        }
+      }
+
+      let totalSeconds = initialise() * 60;
+      startTimer(1000);
+
+      function pauseTimer() {
         if (!paused) {
-          controller.abort();
-          domTimeOffset = domTime;
-          timerElem.classList.add("paused");
           paused = true;
-          document.getElementById("pause").innerText = "Unpause";
+          pauseButton.innerText = "Unpause";
+          timerElem.classList.add("paused");
+          controller.abort();
         } else {
-          controller = new AbortController();
-          minutesStart = minutesStart - minutesFloat;
-          minutesFloat = 0;
-          timerElem.classList.remove("paused");
           paused = false;
-          document.getElementById("pause").innerText = "Pause";
-          animationInterval(interval, controller.signal, timerCallback);
+          pauseButton.innerText = "Pause";
+          timerElem.classList.remove("paused");
+          totalSeconds = remainingSeconds;
+          controller = new AbortController();
+          startTimer(interval);
         }
-        return paused;
       }
-
-      timerCallback(0);
     </script>
     <style>
       /* spectral-600 - latin */
