@@ -6,9 +6,13 @@ Disable the visual effect by turning on prefer reduce motion via browser setting
 The timer will automatically use a 90 minute duration. 
 To set a custom duration, use URL parameters. 
 The default URL once fully loaded looks like so:
-    https://will-lol.github.io/examtimer/?minutes=90
+```
+https://will-lol.github.io/examtimer/?minutes=90
+```
 The URL takes one parameter, minutes. It supports fractional amounts of minutes. For example, if you wanted to test the timer:
-    https://will-lol.github.io/examtimer/?minutes=0.1
+```
+https://will-lol.github.io/examtimer/?minutes=0.1
+```
 
 There is no other configuration needed for this app. If you wish to customise the app, I suggest you look through the code, all contained in the single index.html file. 
 ## Configuring the timer to your liking
